@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
 
@@ -20,10 +20,46 @@ export class UsersService {
     return this.userRepository.findOne({ where: { id } });
   }
 
-  create(createUserDto: CreateUserDto) {
+  async findOneByEmail(email: string) {
+    return this.userRepository.findOne({ where: { email } });
+  }
+
+  async validatePassword(password: string, hashedPassword: string): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword);
+  }
+
+  async create(createUserDto: CreateUserDto) {
+    const missingFields = [];
+
+    if (!createUserDto.name) {
+      missingFields.push('name');
+    }
+    if (!createUserDto.email) {
+      missingFields.push('email');
+    }
+    if (!createUserDto.password) {
+      missingFields.push('password');
+    }
+  
+    if (missingFields.length > 0) {
+      throw new BadRequestException(`The following fields are required: ${missingFields.join(', ')}`);
+    }
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+  
+    const isValidPassword = await this.validatePassword(createUserDto.password, hashedPassword);
+    if (!isValidPassword) {
+      throw new Error('Password validation failed');
+    }
+  
+    createUserDto.password = hashedPassword;
+  
     const newUser = this.userRepository.create(createUserDto);
     return this.userRepository.save(newUser);
   }
+  
+
+
 
   async softDelete(id: number): Promise<string> {
     if (isNaN(id)) {

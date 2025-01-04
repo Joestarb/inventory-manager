@@ -1,43 +1,21 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './modules/users/users.module';  // Asegúrate de importar el UsersModule
-import { User } from './modules/users/entities/user.entity';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from "./modules/auth/auth.module";
 import { CategoriesModule } from './modules/categories/categories.module';
-import { Category } from './modules/categories/entities/category.entity';
-import { SupplierModule } from './modules/suppliers/supplier.module';
-import { Supplier } from './modules/suppliers/entity/supplier.entity';
-import { PurchaseModule } from './modules/purchases/purchase.module';
-import { Purchase } from './modules/purchases/entities/purchase.entity';
+import { DatabaseModule } from './modules/database/database.module';
 import { ProductsModule } from './modules/products/products.module';
-import { Product } from './modules/products/entities/products.enity';
-import { SalesModule } from './modules/sales/sales.module';
-import { Sale } from './modules/sales/entities/sale.entity';
-import { SaleItemsModule } from './modules/sale_items/sale_items.module';
-import { SaleItem } from './modules/sale_items/entities/sale_items.entity';
 import { PurchaseItemsModule } from './modules/purchase_items/purchase_items.module';
-import { PurchaseItems } from './modules/purchase_items/entities/purchase_items.entity';
+import { PurchaseModule } from './modules/purchases/purchase.module';
+import { SaleItemsModule } from './modules/sale_items/sale_items.module';
+import { SalesModule } from './modules/sales/sales.module';
+import { SupplierModule } from './modules/suppliers/supplier.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuthController } from './modules/auth/auth.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      database: 'pos_system',
-      entities: [
-        User,
-        Category,
-        Supplier,
-        Purchase,
-        Product,
-        Sale,
-        SaleItem,
-        PurchaseItems,
-      ],
-      synchronize: false,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
+    DatabaseModule,
     UsersModule,
     CategoriesModule,
     SupplierModule,
@@ -46,9 +24,11 @@ import { PurchaseItems } from './modules/purchase_items/entities/purchase_items.
     SalesModule,
     SaleItemsModule,
     PurchaseItemsModule,
+    AuthModule,
   ],
-  controllers: [],
+  controllers: [AuthController],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
+
 

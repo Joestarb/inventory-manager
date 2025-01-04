@@ -1,13 +1,16 @@
-import { Controller, Get, Post, Param, Body, Put, ParseIntPipe} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Put, ParseIntPipe, UseGuards} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
+
+    @UseGuards(JwtAuthGuard)
     @Get()
     @ApiOperation({ summary: 'List of all users' })
     @ApiResponse({ status: 200, description: 'List of all users' })
@@ -27,6 +30,10 @@ export class UsersController {
     @Post()
     @ApiOperation({ summary: 'Create a new user' })
     @ApiResponse({ status: 200, description: 'Create a new user' })
+    @ApiBody({
+        description: 'Payload for creating a user',
+        type: CreateUserDto,
+      })
     create(@Body() CreateUserDto: CreateUserDto){
         return this.usersService.create(CreateUserDto);
     }
@@ -44,7 +51,7 @@ export class UsersController {
     softDelete(@Param('id', ParseIntPipe) id: number): Promise<string> {
         return this.usersService.softDelete(id);
     }
-z
+
 
 
     
